@@ -6,10 +6,13 @@ require('dotenv').config()
 
 const express = require('express')
 
+const productsRouter = require('./routes/products')
+
 
 const errorHandlerMiddleware = require('./middleware/error-handler')
 const notFound = require('./middleware/not-found')
 const connectDB = require('./db/connect')
+
 
 
 // *** inicializo express app y agrego JSON middleware ***
@@ -19,12 +22,13 @@ app.use(express.json())
 
 // *** routing ***
 
+// una para manual testing
 app.get('/', (req,res) => {
   res.send('<h1> Store API </h1> <a href="/api/v1/products"> Products route</a>') //enviamos link para enviar al product page
 })
 
-// products route
-
+// products route (le paso el router)
+app.use('/api/v1/products', productsRouter)
 
 // *** middlewares ***
 
