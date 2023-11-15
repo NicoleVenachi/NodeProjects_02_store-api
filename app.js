@@ -2,7 +2,7 @@ console.log('04 Store API')
 
 // *** imports
 require('dotenv').config()
-// async errors
+require('express-async-errors')// async errors
 
 const express = require('express')
 
