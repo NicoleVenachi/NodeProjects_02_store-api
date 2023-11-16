@@ -1,3 +1,5 @@
+// controller setup 
+
 
 const getAllProductsStatic = async (req,res) => { //async para usar mongo
   throw new Error('Testing async errors')
