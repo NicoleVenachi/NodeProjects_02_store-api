@@ -7,8 +7,10 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 
   //static -> yo predefino las querying conditions, no me las mandan por request
   // en la static, muestro solo los que estan featured.
+  const search = 'ab'
   const products = await Model.find({
-    featured: true
+    // featured: true
+    name: {$regex: search, $options: 'i'}
   })
 
   // throw new Error('Testing async errors')
@@ -20,14 +22,19 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 const getAllProducts = async (req,res) => {
 
   // console.log(req.query);
-  const {featured} = req.query; //destructuro qué voy a buscar
+  const {featured, company, name} = req.query; //destructuro qué voy a buscar
   const queryObject = {} //estructuro un objeto de busquedaapropiadamente
 
-  if (featured) {
+  if (featured) { //if exists
     //casteo además al tipo de dato del model
     queryObject.featured = featured === 'true' ? true : false
   }
-
+  if (company) { 
+    queryObject.company = company 
+  }
+  if (name) { //con query operators
+    queryObject.name = {$regex: name, $options: 'i'} //regex, match a regular expresion
+  }
   // dynaminc -> envío los querying conditions en la peticion
   const products = await Model.find(queryObject)
 
