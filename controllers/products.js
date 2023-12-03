@@ -19,8 +19,17 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 
 const getAllProducts = async (req,res) => {
 
+  // console.log(req.query);
+  const {featured} = req.query; //destructuro qué voy a buscar
+  const queryObject = {} //estructuro un objeto de busquedaapropiadamente
+
+  if (featured) {
+    //casteo además al tipo de dato del model
+    queryObject.featured = featured === 'true' ? true : false
+  }
+
   // dynaminc -> envío los querying conditions en la peticion
-  const products = await Model.find(req.query)
+  const products = await Model.find(queryObject)
 
   res.status(200).json({products, nhHits: products.length})
 }
