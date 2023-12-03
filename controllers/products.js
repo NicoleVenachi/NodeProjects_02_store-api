@@ -4,14 +4,18 @@ const Model = require('../models/product');
 // controller setup 
 
 const getAllProductsStatic = async (req,res) => { //async para usar mongo
-
+  
+  // static approoach para testint de cositas anges de llevarlas al real
   //static -> yo predefino las querying conditions, no me las mandan por request
-  // en la static, muestro solo los que estan featured.
-  const search = 'ab'
-  const products = await Model.find({
-    // featured: true
-    name: {$regex: search, $options: 'i'}
-  })
+  // const search = 'ab'
+  // const products = await Model.find({
+  //   // featured: true // muestro solo los que estan featured.
+  //   name: {$regex: search, $options: 'i'}
+  // })
+
+  const products = await Model.
+    find({}).
+    sort({name: 1, price: 1});
 
   // throw new Error('Testing async errors')
 
@@ -22,7 +26,7 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 const getAllProducts = async (req,res) => {
 
   // console.log(req.query);
-  const {featured, company, name} = req.query; //destructuro qué voy a buscar
+  const {featured, company, name, sort} = req.query; //destructuro qué voy a buscar
   const queryObject = {} //estructuro un objeto de busquedaapropiadamente
 
   if (featured) { //if exists
@@ -35,8 +39,21 @@ const getAllProducts = async (req,res) => {
   if (name) { //con query operators
     queryObject.name = {$regex: name, $options: 'i'} //regex, match a regular expresion
   }
+
+
+
   // dynaminc -> envío los querying conditions en la peticion
-  const products = await Model.find(queryObject)
+  let result = Model.find(queryObject)
+
+  if (sort) {
+    const sortList = sort.split(',').join(' ') //separo en coma, y uno con espacios
+    // console.log(sortList);
+    result = result.sort(sortList)
+  }
+  else { //default sorting
+    result  = result.sort('createdAt')
+  }
+  const products = await result //finally 'executing' the query
 
   res.status(200).json({products, nhHits: products.length})
 }
