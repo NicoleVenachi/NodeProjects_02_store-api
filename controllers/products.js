@@ -5,7 +5,7 @@ const Model = require('../models/product');
 
 const getAllProductsStatic = async (req,res) => { //async para usar mongo
   
-  // static approoach para testint de cositas anges de llevarlas al real
+  // static approoach para testing de cositas anges de llevarlas al real
   //static -> yo predefino las querying conditions, no me las mandan por request
   // const search = 'ab'
   // const products = await Model.find({
@@ -13,12 +13,20 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
   //   name: {$regex: search, $options: 'i'}
   // })
 
-  const products = await Model.
-    find({}).
-    sort({name: 1, price: 1}).
-    select({name:1, price: 1}).
-    limit(5).
-    skip(1);
+  // const products = await Model.
+  //   find({}).
+  //   sort({name: 1, price: 1}).
+  //   select({name:1, price: 1}).
+  //   limit(5).
+  //   skip(1);
+
+
+  
+  const products = await Model.find({
+    // featured: true // muestro solo los que estan featured.
+    price: {$gt:30}
+  })
+  .sort('price')
 
   // throw new Error('Testing async errors')
 
@@ -29,7 +37,7 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 const getAllProducts = async (req,res) => {
 
   // console.log(req.query);
-  const {featured, company, name, sort, fields,} = req.query; //destructuro qué voy a buscar
+  const {featured, company, name, sort, fields, numericFilters} = req.query; //destructuro qué voy a buscar
   const queryObject = {} //estructuro un objeto de busquedaapropiadamente
 
   if (featured) { //if exists
@@ -74,6 +82,25 @@ const getAllProducts = async (req,res) => {
 
 
 
+  // numeri filters
+  if(numericFilters){
+    console.log(numericFilters)
+    const operatorMap = {
+      '>': '$gt',
+      '>=': '$gte',
+      '=': '$eq',
+      '<': '$lt',
+      '<=': '$lte',
+    }
+
+    const regEx = /\b(>|>=|=|<|<=)\b/g //regular expresion sacada de Stack overflo
+    let filters = numericFilters.replace(regEx,(match) => `-${operatorMap[match]}-`) // regEx and the call back for every match (devolemos el operador mapeado a mongo)
+
+    console.log(filters);
+
+  }
+
+
   const products = await result //finally 'executing' the query
 
   res.status(200).json({products, nhHits: products.length})
@@ -83,3 +110,4 @@ module.exports = {
   getAllProductsStatic,
   getAllProducts
 }
+'<=': '$lt',
