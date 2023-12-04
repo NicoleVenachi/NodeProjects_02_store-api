@@ -54,6 +54,44 @@ const getAllProducts = async (req,res) => {
 
 
   // dynaminc -> envío los querying conditions en la peticion
+
+  // *** numeric filters
+  if(numericFilters){
+
+    // -> Operators to mongo sintax
+    // console.log(numericFilters)
+    const operatorMap = {
+      '>': '$gt',
+      '>=': '$gte',
+      '=': '$eq',
+      '<': '$lt',
+      '<=': '$lte',
+    }
+
+    const regEx = /\b(>|>=|=|<|<=)\b/g //regular expresion sacada de Stack overflo
+    let filters = numericFilters.replace(regEx,(match) => `-${operatorMap[match]}-`) // regEx and the call back for every match (devolemos el operador mapeado a mongo)
+
+    // console.log(filters);
+
+
+    // -> validate possible properties to use numeric filtering
+    const options = ['price', 'rating']
+    fitlers = filters.split(',').forEach((item) => {
+
+      // e.g., price-$gt-40,
+      // i.e., FIELD-OPERATOR-VALUE
+      const [field, operator,  value] = item.split('-') //array destructuring, sacando lo que está en medio de guiones o hyphen
+
+      if (options.includes(field)) {
+        queryObject[field] = {
+          [operator]: Number(value)
+        } //add query operators object for field 
+      }
+    })
+  }
+
+  console.log(queryObject);
+
   let result = Model.find(queryObject)
 
   // query sorting
@@ -80,27 +118,6 @@ const getAllProducts = async (req,res) => {
 
   result = result.limit(limit).skip(skip);
 
-
-
-  // numeri filters
-  if(numericFilters){
-    console.log(numericFilters)
-    const operatorMap = {
-      '>': '$gt',
-      '>=': '$gte',
-      '=': '$eq',
-      '<': '$lt',
-      '<=': '$lte',
-    }
-
-    const regEx = /\b(>|>=|=|<|<=)\b/g //regular expresion sacada de Stack overflo
-    let filters = numericFilters.replace(regEx,(match) => `-${operatorMap[match]}-`) // regEx and the call back for every match (devolemos el operador mapeado a mongo)
-
-    console.log(filters);
-
-  }
-
-
   const products = await result //finally 'executing' the query
 
   res.status(200).json({products, nhHits: products.length})
@@ -110,4 +127,3 @@ module.exports = {
   getAllProductsStatic,
   getAllProducts
 }
-'<=': '$lt',
