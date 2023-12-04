@@ -15,7 +15,8 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 
   const products = await Model.
     find({}).
-    sort({name: 1, price: 1});
+    sort({name: 1, price: 1}).
+    select({name:1, price: 1});
 
   // throw new Error('Testing async errors')
 
@@ -26,7 +27,7 @@ const getAllProductsStatic = async (req,res) => { //async para usar mongo
 const getAllProducts = async (req,res) => {
 
   // console.log(req.query);
-  const {featured, company, name, sort} = req.query; //destructuro qué voy a buscar
+  const {featured, company, name, sort, fields} = req.query; //destructuro qué voy a buscar
   const queryObject = {} //estructuro un objeto de busquedaapropiadamente
 
   if (featured) { //if exists
@@ -45,6 +46,7 @@ const getAllProducts = async (req,res) => {
   // dynaminc -> envío los querying conditions en la peticion
   let result = Model.find(queryObject)
 
+  // query sorting
   if (sort) {
     const sortList = sort.split(',').join(' ') //separo en coma, y uno con espacios
     // console.log(sortList);
@@ -53,6 +55,13 @@ const getAllProducts = async (req,res) => {
   else { //default sorting
     result  = result.sort('createdAt')
   }
+
+  //query selecting fields to call up
+  if (fields) {
+    const fieldsList = fields.split(',').join(' ')
+    result = result.select(fieldsList)
+  }
+
   const products = await result //finally 'executing' the query
 
   res.status(200).json({products, nhHits: products.length})
